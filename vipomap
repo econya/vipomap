@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Edit Postfix map files and do not forget to call postmap on them.
+# Script released under the GPLv3 or later by Felix Wolfsteller, econya, 2015.
+
+usage="Usage: $0 path_to_hash_file"
+
+# Require an argument
+if [ "$#" == "0" ]; then
+  echo "$usage"
+  exit 1
+fi
+
+if [ ! -f "$1" ]; then
+  echo "$usage"
+  echo "  path_to_hash_file must point to a valid file."
+  exit 2
+fi
+
+# obtain temporary file
+tmp_file=$(mktemp)
+cp "$1" "$tmp_file"
+
+# open temporary file in editor
+"${EDITOR:-${VISUAL:-vi}}" "$tmp_file"
+
+# TODO check validity and STDERR of postmap process,
+# go back into editor until all issues removed.
+## convert using postmap
+#postmap "$tmp_file"
+
+# move file contents over and redo postmap
+cp "$tmp_file" "$1"
+postmap "$1"
+
+rm "$tmp_file"
+#rm "$tmp_file.db"
+echo "vipomap: $1 converted."
+
+# exit with a cool move
+exit 0
